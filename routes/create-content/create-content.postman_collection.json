@@ -1,0 +1,69 @@
+{
+  "info": {
+    "_postman_id": "c7b1f7a2-2e0a-4b3e-9e1e-collection-2025-07-04",
+    "name": "peck-strut-ai-content API",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+    "description": "Postman collection for peck-strut-ai-content Fastify server."
+  },
+  "item": [
+    {
+      "name": "Create Content",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"prompt\": \"Write a story about a cat.\",\n  \"persona\": \"Storyteller\",\n  \"sentiment\": \"Cheerful\"\n}"
+        },
+        "url": {
+          "raw": "http://localhost:3000/create-content",
+          "protocol": "http",
+          "host": ["localhost"],
+          "port": "3000",
+          "path": ["create-content"]
+        },
+        "description": "Creates content using the prompt, persona, and sentiment. Returns formatted prompt and OpenAI response."
+      },
+      "response": [
+        {
+          "name": "Success",
+          "originalRequest": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"prompt\": \"Write a story about a cat.\",\n  \"persona\": \"Storyteller\",\n  \"sentiment\": \"Cheerful\"\n}"
+            },
+            "url": {
+              "raw": "http://localhost:3000/create-content",
+              "protocol": "http",
+              "host": ["localhost"],
+              "port": "3000",
+              "path": ["create-content"]
+            }
+          },
+          "status": "OK",
+          "code": 200,
+          "_postman_previewlanguage": "json",
+          "header": [
+            {
+              "key": "Content-Type",
+              "value": "application/json"
+            }
+          ],
+          "body": "{\n  \"openai\": {\n    ... OpenAI API response ...\n  }\n}"
+        }
+      ]
+    }
+  ]
+}
