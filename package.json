@@ -12,7 +12,6 @@
   "engines": {
     "node": "20.x"
   },
-  "packageManager": "pnpm@10.12.4",
   "dependencies": {
     "fastify": "^5.4.0",
     "handlebars": "^4.7.8",
