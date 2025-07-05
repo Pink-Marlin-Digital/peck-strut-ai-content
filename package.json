@@ -14,9 +14,11 @@
     "node": "20.x"
   },
   "dependencies": {
-    "fastify": "^4.27.2",
+    "fastify": "^5.4.0",
     "handlebars": "^4.7.8",
     "openai": "^4.30.0",
+    "@fastify/swagger": "^9.0.0",
+    "@fastify/swagger-ui": "^5.2.3",
     "dotenv": "^16.4.5"
   },
   "devDependencies": {

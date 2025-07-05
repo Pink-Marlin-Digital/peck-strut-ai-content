@@ -1,8 +1,38 @@
 import 'dotenv/config';
 import Fastify from 'fastify';
+import fastifySwagger from '@fastify/swagger';
+import fastifySwaggerUi from '@fastify/swagger-ui';
 import { registerCreateContentRoute } from './routes/create-content/create-content.route.js';
 
 const server = Fastify();
+
+// Global API key protection
+server.addHook('preHandler', async (request, reply) => {
+  // Allow public access to Swagger docs
+  const url = request.raw.url || request.url;
+  if (url.startsWith('/docs')) return;
+
+  const requiredKey = process.env.API_KEY;
+  if (!requiredKey) return; // Skip check if not set
+  const authHeader = request.headers['authorization'];
+  if (!authHeader || authHeader !== `Bearer ${requiredKey}`) {
+    reply.code(401).send({ error: 'Unauthorized' });
+  }
+});
+
+// Register Swagger plugins
+await server.register(fastifySwagger, {
+  openapi: {
+    info: {
+      title: 'Peck & Strut AI Content API',
+      description: 'API documentation for Peck & Strut AI Content server',
+      version: '1.0.0'
+    }
+  }
+});
+await server.register(fastifySwaggerUi, {
+  routePrefix: '/docs'
+});
 
 // Register all routes
 console.info('[index] Registering all routes');
