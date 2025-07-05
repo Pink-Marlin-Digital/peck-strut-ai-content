@@ -7,8 +7,7 @@
   "scripts": {
     "start": "node index.js",
     "dev": "nodemon index.js",
-    "test": "vitest run",
-    "heroku-postbuild": "pnpm install --frozen-lockfile"
+    "test": "vitest run"
   },
   "engines": {
     "node": "20.x"
