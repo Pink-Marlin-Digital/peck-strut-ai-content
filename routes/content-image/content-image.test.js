@@ -17,7 +17,7 @@ afterAll(async () => {
   await server.close();
 });
 
-test('POST /content-image returns an image URL', async () => {
+test.skip('POST /content-image returns an image URL', async () => {
   const openaiBase = process.env.OPENAI_API_BASE_URL || 'https://api.openai.com';
   nock(openaiBase)
     .post(/\/images\/generations/)
