@@ -3,6 +3,7 @@ import Fastify from 'fastify';
 import fastifySwagger from '@fastify/swagger';
 import fastifySwaggerUi from '@fastify/swagger-ui';
 import { registerCreateContentRoute } from './routes/create-content/create-content.route.js';
+import { registerContentImageRoute } from './routes/content-image/content-image.route.js';
 
 const server = Fastify();
 
@@ -37,6 +38,7 @@ await server.register(fastifySwaggerUi, {
 // Register all routes
 console.info('[index] Registering all routes');
 registerCreateContentRoute(server);
+registerContentImageRoute(server);
 
 const PORT = process.env.PORT || 3000;
 server.listen({ port: PORT, host: '0.0.0.0' }, err => {

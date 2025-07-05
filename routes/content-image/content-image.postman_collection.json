@@ -1,0 +1,69 @@
+{
+  "info": {
+    "_postman_id": "c7b1f7a2-2e0a-4b3e-9e1e-content-image-2025-07-04",
+    "name": "Content Image API",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+    "description": "Postman collection for the /content-image Fastify route."
+  },
+  "item": [
+    {
+      "name": "Generate Content Image",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"message\": \"A chicken riding a skateboard\"\n}"
+        },
+        "url": {
+          "raw": "http://localhost:3000/content-image",
+          "protocol": "http",
+          "host": ["localhost"],
+          "port": "3000",
+          "path": ["content-image"]
+        },
+        "description": "Generates an image from a prompt using the LLM (OpenAI)."
+      },
+      "response": [
+        {
+          "name": "Success",
+          "originalRequest": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"message\": \"A chicken riding a skateboard\"\n}"
+            },
+            "url": {
+              "raw": "http://localhost:3000/content-image",
+              "protocol": "http",
+              "host": ["localhost"],
+              "port": "3000",
+              "path": ["content-image"]
+            }
+          },
+          "status": "OK",
+          "code": 200,
+          "_postman_previewlanguage": "json",
+          "header": [
+            {
+              "key": "Content-Type",
+              "value": "application/json"
+            }
+          ],
+          "body": "{\n  \"imageUrl\": \"https://mock-image-url.com/image.png\"\n}"
+        }
+      ]
+    }
+  ]
+}
