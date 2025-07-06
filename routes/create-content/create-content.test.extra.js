@@ -50,6 +50,20 @@ test('POST /create-content works with only prompt', async () => {
           index: 0
         }
       ]
+    })
+    .post(/\/chat\/completions/)
+    .reply(200, {
+      id: 'mock-id-9',
+      created: Date.now(),
+      model,
+      usage: { prompt_tokens: 10, completion_tokens: 10, total_tokens: 20 },
+      choices: [
+        {
+          message: { role: 'assistant', content: 'A vivid farm scene for the prompt only.' },
+          finish_reason: 'stop',
+          index: 0
+        }
+      ]
     });
 
   const res = await fetch(`http://127.0.0.1:${address.port}/create-content`, {
@@ -65,6 +79,9 @@ test('POST /create-content works with only prompt', async () => {
   expect(json.message).not.toContain('Sentiment:');
   expect(Array.isArray(json.hashtags)).toBe(true);
   expect(json.hashtags[0]).toMatch(/^#/);
+  expect(typeof json.image_prompt).toBe('string');
+  expect(json.image_prompt.length).toBeGreaterThan(0);
+  expect(json.image_prompt).toContain('farm');
 });
 
 test('POST /create-content works with prompt and persona only', async () => {
@@ -125,6 +142,9 @@ test('POST /create-content works with prompt and persona only', async () => {
   expect(json.message).not.toContain('Sentiment:');
   expect(Array.isArray(json.hashtags)).toBe(true);
   expect(json.hashtags[0]).toMatch(/^#/);
+  expect(typeof json.image_prompt).toBe('string');
+  expect(json.image_prompt.length).toBeGreaterThan(0);
+  expect(json.image_prompt).toContain('farm');
 });
 
 test('POST /create-content works with prompt and sentiment only', async () => {

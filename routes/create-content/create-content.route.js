@@ -8,6 +8,7 @@ import { fileURLToPath } from "url";
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 const TEMPLATE_PATH = path.join(__dirname, "./prompt-template.md");
+const IMAGE_PROMPT_TEMPLATE_PATH = path.join(__dirname, "./image-prompt-template.md");
 
 /**
  * Registers the /create-content route on the provided Fastify instance.
@@ -22,14 +23,26 @@ export function registerCreateContentRoute(server) {
     const templateContent = fs.readFileSync(TEMPLATE_PATH, "utf8");
     return Handlebars.compile(templateContent);
   }
+  function loadImagePromptTemplate() {
+    console.info("[loadImagePromptTemplate] Loading and compiling image prompt template");
+    const templateContent = fs.readFileSync(IMAGE_PROMPT_TEMPLATE_PATH, "utf8");
+    return Handlebars.compile(templateContent);
+  }
 
   let compiledTemplate = loadTemplate();
+  let compiledImagePromptTemplate = loadImagePromptTemplate();
 
   fs.watchFile(TEMPLATE_PATH, () => {
     console.info(
       "[registerCreateContentRoute] Detected change in prompt-template.md, reloading template"
     );
     compiledTemplate = loadTemplate();
+  });
+  fs.watchFile(IMAGE_PROMPT_TEMPLATE_PATH, () => {
+    console.info(
+      "[registerCreateContentRoute] Detected change in image-prompt-template.md, reloading template"
+    );
+    compiledImagePromptTemplate = loadImagePromptTemplate();
   });
 
   server.post("/create-content", {
@@ -65,6 +78,10 @@ export function registerCreateContentRoute(server) {
               type: "array",
               items: { type: "string" },
               description: "Relevant hashtags for the content",
+            },
+            image_prompt: {
+              type: "string",
+              description: "Generated system prompt for image creation based on the post text"
             },
           },
         },
@@ -178,7 +195,26 @@ export function registerCreateContentRoute(server) {
             error: e.message,
           });
         }
-        return reply.send({ message, hashtags });
+        // Third LLM call for image prompt
+        const imagePromptInput = { postText: message };
+        const imagePromptText = compiledImagePromptTemplate(imagePromptInput);
+        console.info("[POST /create-content] Sending third LLM call for image prompt");
+        const imagePromptCompletion = await openai.chat.completions.create({
+          model,
+          messages: [{ role: "user", content: imagePromptText }],
+          temperature: 0.7,
+        });
+        const imagePromptMeta = {
+          id: imagePromptCompletion.id,
+          created: imagePromptCompletion.created,
+          model: imagePromptCompletion.model,
+          usage: imagePromptCompletion.usage,
+          choices: imagePromptCompletion.choices?.length,
+        };
+        console.info("[POST /create-content] OpenAI image prompt response metadata", imagePromptMeta);
+        const image_prompt = imagePromptCompletion.choices?.[0]?.message?.content || "";
+
+        return reply.send({ message, hashtags, image_prompt });
       } catch (err) {
         console.warn("[POST /create-content] Error contacting OpenAI", {
           error: err.message,

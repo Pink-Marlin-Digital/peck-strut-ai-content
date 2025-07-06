@@ -68,6 +68,21 @@ test('POST /create-content returns formatted prompt and sends to LLM', async () 
           index: 0
         }
       ]
+    })
+    // Third LLM call: image prompt
+    .post(/\/chat\/completions/)
+    .reply(200, {
+      id: 'mock-id-3',
+      created: Date.now(),
+      model,
+      usage: { prompt_tokens: 10, completion_tokens: 10, total_tokens: 20 },
+      choices: [
+        {
+          message: { role: 'assistant', content: 'A cheerful cartoon chicken running in a sunny farmyard with fireworks in the background.' },
+          finish_reason: 'stop',
+          index: 0
+        }
+      ]
     });
 
   const res = await fetch(`http://127.0.0.1:${address.port}/create-content`, {
@@ -91,4 +106,7 @@ test('POST /create-content returns formatted prompt and sends to LLM', async () 
   expect(Array.isArray(json.hashtags)).toBe(true);
   expect(json.hashtags.length).toBeGreaterThan(0);
   expect(json.hashtags[0]).toMatch(/^#/);
+  expect(typeof json.image_prompt).toBe('string');
+  expect(json.image_prompt.length).toBeGreaterThan(0);
+  expect(json.image_prompt).toContain('chicken');
 });
