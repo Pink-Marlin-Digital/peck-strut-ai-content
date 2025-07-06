@@ -1,5 +1,5 @@
 {
-  "watch": ["index.js", "src/", "server/"],
+  "watch": ["index.js", "src/", "server/", "routes/"],
   "ext": "js,mjs,json",
   "exec": "node --experimental-modules ./index.js"
 }

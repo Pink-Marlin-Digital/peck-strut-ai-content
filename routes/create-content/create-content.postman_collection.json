@@ -7,7 +7,8 @@
   },
   "item": [
     {
-      "name": "Create Content",
+      "name": "Create Content (prompt + persona + sentiment)",
+
       "request": {
         "method": "POST",
         "header": [
@@ -64,6 +65,79 @@
           "body": "{\n  \"openai\": {\n    ... OpenAI API response ...\n  }\n}"
         }
       ]
+    },
+    {
+      "name": "Create Content (prompt only)",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"prompt\": \"Just a prompt.\"\n}"
+        },
+        "url": {
+          "raw": "http://localhost:3000/create-content",
+          "protocol": "http",
+          "host": ["localhost"],
+          "port": "3000",
+          "path": ["create-content"]
+        },
+        "description": "Creates content using only the prompt field. persona and sentiment are omitted."
+      }
+    },
+    {
+      "name": "Create Content (prompt + persona)",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"prompt\": \"Prompt with persona.\",\n  \"persona\": \"Narrator\"\n}"
+        },
+        "url": {
+          "raw": "http://localhost:3000/create-content",
+          "protocol": "http",
+          "host": ["localhost"],
+          "port": "3000",
+          "path": ["create-content"]
+        },
+        "description": "Creates content using prompt and persona fields. sentiment is omitted."
+      }
+    },
+    {
+      "name": "Create Content (prompt + sentiment)",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"prompt\": \"Prompt with sentiment.\",\n  \"sentiment\": \"Excited\"\n}"
+        },
+        "url": {
+          "raw": "http://localhost:3000/create-content",
+          "protocol": "http",
+          "host": ["localhost"],
+          "port": "3000",
+          "path": ["create-content"]
+        },
+        "description": "Creates content using prompt and sentiment fields. persona is omitted."
+      }
     }
   ]
 }
+

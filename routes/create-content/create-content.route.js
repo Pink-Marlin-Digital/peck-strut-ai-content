@@ -40,7 +40,7 @@ export function registerCreateContentRoute(server) {
       tags: ["Content"],
       body: {
         type: "object",
-        required: ["prompt", "persona", "sentiment"],
+        required: ["prompt"],
         properties: {
           prompt: {
             type: "string",
@@ -84,23 +84,28 @@ export function registerCreateContentRoute(server) {
       },
     },
     handler: async (request, reply) => {
-      const { prompt, persona, sentiment } = request.body;
+      let { prompt, persona, sentiment } = request.body;
       console.info("[POST /create-content] Received request", {
         prompt,
         persona,
         sentiment,
       });
-      if (!prompt || !persona || !sentiment) {
-        console.warn("[POST /create-content] Missing required fields", {
-          prompt,
-          persona,
-          sentiment,
+      if (!persona) {
+        persona =
+          process.env.DEFAULT_PERSONA ||
+          "A budding chicken farmer who is excited to leave their suburban life to start a farm";
+      }
+      if (!sentiment) {
+        sentiment =
+          process.env.DEFAULT_SENTIMENT || "Cheerful, warm and inviting";
+      }
+      // Validate required fields
+      if (!prompt) {
+        console.warn("[POST /create-content] Missing required field: prompt", request.body);
+        return reply.code(400).send({
+          error: "Missing required field: prompt",
+          received: request.body
         });
-        return reply
-          .code(400)
-          .send({
-            error: "Missing required fields: prompt, persona, sentiment",
-          });
       }
       const formattedPrompt = compiledTemplate({ prompt, persona, sentiment });
       console.info("[POST /create-content] Formatted prompt generated");
