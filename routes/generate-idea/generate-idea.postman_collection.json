@@ -1,0 +1,38 @@
+{
+  "info": {
+    "_postman_id": "c90c9b1e-1234-4bde-8f5e-idea12345678",
+    "name": "Generate Idea Route",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+    "description": "Postman collection for testing the /generate-idea route."
+  },
+  "item": [
+    {
+      "name": "Generate Social Media Ideas",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"platform\": \"Instagram\",\n  \"topic\": \"sustainable farming\",\n  \"count\": 5,\n  \"persona\": \"Eco-conscious influencer\",\n  \"sentiment\": \"Positive and inspiring\"\n}"
+        },
+        "url": {
+          "raw": "http://localhost:3000/generate-idea",
+          "protocol": "http",
+          "host": [
+            "localhost"
+          ],
+          "port": "3000",
+          "path": [
+            "generate-idea"
+          ]
+        }
+      },
+      "response": []
+    }
+  ]
+}
