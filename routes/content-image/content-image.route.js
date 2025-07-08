@@ -2,6 +2,8 @@ import fs from "fs";
 import path from "path";
 import { fileURLToPath } from "url";
 import { OpenAI } from "openai";
+import { S3Client, PutObjectCommand } from "@aws-sdk/client-s3";
+import crypto from "crypto";
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -75,11 +77,11 @@ export function registerContentImageRoute(server) {
           .code(400)
           .send({ error: "Missing required field: message" });
       }
-      const apiKey = process.env.OPENAI_API_KEY;
-      const baseURL = process.env.OPENAI_API_BASE_URL;
+      const apiKey = process.env.IMAGE_API_KEY;
+      const baseURL = process.env.IMAGE_API_BASE_URL;
       if (!apiKey) {
         console.warn(
-          "[POST /content-image] OPENAI_API_KEY not set in environment"
+          "[POST /content-image] IMAGE_API_KEY not set in environment"
         );
         return reply
           .code(500)
@@ -97,19 +99,19 @@ export function registerContentImageRoute(server) {
           console.warn("[POST /content-image] Invalid size parameter", {
             size,
           });
-          return reply
-            .code(400)
-            .send({
-              error: "Invalid size. Supported: square, portrait, landscape.",
-            });
+          return reply.code(400).send({
+            error: "Invalid size. Supported: square, portrait, landscape.",
+          });
         }
         console.info(
           "[POST /content-image] Sending image generation request to OpenAI",
           { baseURL, openaiSize }
         );
         const openai = new OpenAI({
-          apiKey: process.env.IMAGE_API_KEY,
-          //   baseURL,
+          apiKey,
+          organization: "org-WNA4zEtIF2doE60kSS1Od48M",
+          project: "proj_9OxDl4T8AdcFKqEeL00ez2K6",
+          baseUrl: "https://api.openai.com/v1/images/generations",
         });
         const response = await openai.images.generate({
           prompt: message,
@@ -117,23 +119,70 @@ export function registerContentImageRoute(server) {
           size: openaiSize,
           model: process.env.OPENAI_IMAGE_MODEL || "dall-e-3",
         });
-
+        console.log("response", response);
         const image_base64 = response.data[0].b64_json;
         const image_bytes = Buffer.from(image_base64, "base64");
-        fs.writeFileSync("otter.png", image_bytes);
-        throw new Error("Image generation failed");
-        const imageUrl = response.data[0]?.url;
-        if (!imageUrl) {
-          console.warn(
-            "[POST /content-image] No image URL returned from OpenAI",
-            { response }
+
+        // S3 upload
+        // Check for S3 credentials
+        const hasS3Creds =
+          process.env.AWS_ACCESS_KEY_ID &&
+          process.env.AWS_SECRET_ACCESS_KEY &&
+          process.env.AWS_REGION &&
+          process.env.S3_BUCKET;
+        const filename = `content-image-${Date.now()}-${crypto
+          .randomBytes(8)
+          .toString("hex")}.png`;
+        if (hasS3Creds) {
+          const s3 = new S3Client({
+            region: process.env.AWS_REGION,
+            credentials: {
+              accessKeyId: process.env.AWS_ACCESS_KEY_ID,
+              secretAccessKey: process.env.AWS_SECRET_ACCESS_KEY,
+            },
+          });
+          const bucket = process.env.S3_BUCKET;
+          try {
+            await s3.send(
+              new PutObjectCommand({
+                Bucket: bucket,
+                Key: filename,
+                Body: image_bytes,
+                ContentType: "image/png",
+                ACL: "public-read",
+              })
+            );
+            const s3Url = `https://${bucket}.s3.${process.env.AWS_REGION}.amazonaws.com/${filename}`;
+            console.info("[POST /content-image] Image uploaded to S3", {
+              s3Url,
+            });
+            return reply.send({ imageUrl: s3Url });
+          } catch (s3err) {
+            console.warn("[POST /content-image] Failed to upload to S3", {
+              error: s3err.message,
+            });
+            return reply.code(500).send({
+              error: "Failed to upload image to S3",
+              details: s3err.message,
+            });
+          }
+        } else {
+          // Fallback: save locally
+          const localDir = path.join(
+            __dirname,
+            "../../public/generated-images"
           );
-          return reply
-            .code(500)
-            .send({ error: "No image URL returned from OpenAI." });
+          if (!fs.existsSync(localDir)) {
+            fs.mkdirSync(localDir, { recursive: true });
+          }
+          const localPath = path.join(localDir, filename);
+          fs.writeFileSync(localPath, image_bytes);
+          const relativeUrl = `/generated-images/${filename}`;
+          console.info("[POST /content-image] Image saved locally", {
+            relativeUrl,
+          });
+          return reply.send({ imageUrl: relativeUrl });
         }
-        console.info("[POST /content-image] Image generated", { imageUrl });
-        return reply.send({ imageUrl });
       } catch (err) {
         console.warn("[POST /content-image] Error contacting OpenAI", {
           error: err.message,
