@@ -2,7 +2,10 @@ import fs from "fs";
 import path from "path";
 import { fileURLToPath } from "url";
 import { OpenAI } from "openai";
-import { S3Client, PutObjectCommand } from "@aws-sdk/client-s3";
+import { registerContentImageListRoute } from "./list-content-images.route.js";
+import axios from "axios";
+import sharp from "sharp";
+import { uploadToS3 } from "../../services/s3.service.js";
 import crypto from "crypto";
 
 const __filename = fileURLToPath(import.meta.url);
@@ -42,9 +45,17 @@ export function registerContentImageRoute(server) {
         200: {
           type: "object",
           properties: {
-            imageUrl: {
+            originalUrl: {
               type: "string",
-              description: "URL of the generated image",
+              description: "URL of the original image",
+            },
+            thumbnailUrl: {
+              type: "string",
+              description: "URL of the thumbnail image",
+            },
+            folder: {
+              type: "string",
+              description: "Folder name for the generated image",
             },
           },
         },
@@ -109,80 +120,56 @@ export function registerContentImageRoute(server) {
         );
         const openai = new OpenAI({
           apiKey,
-          organization: "org-WNA4zEtIF2doE60kSS1Od48M",
-          project: "proj_9OxDl4T8AdcFKqEeL00ez2K6",
-          baseUrl: "https://api.openai.com/v1/images/generations",
         });
+
         const response = await openai.images.generate({
           prompt: message,
           n: 1,
           size: openaiSize,
           model: process.env.OPENAI_IMAGE_MODEL || "dall-e-3",
         });
-        console.log("response", response);
-        const image_base64 = response.data[0].b64_json;
-        const image_bytes = Buffer.from(image_base64, "base64");
 
-        // S3 upload
-        // Check for S3 credentials
-        const hasS3Creds =
-          process.env.AWS_ACCESS_KEY_ID &&
-          process.env.AWS_SECRET_ACCESS_KEY &&
-          process.env.AWS_REGION &&
-          process.env.S3_BUCKET;
-        const filename = `content-image-${Date.now()}-${crypto
+        // Download the image from the URL returned by the LLM
+        const url = response.data[0].url;
+        const axiosResponse = await axios.get(url, {
+          responseType: "arraybuffer",
+        });
+        const originalBuffer = Buffer.from(axiosResponse.data);
+
+        // Generate a unique folder name for this request
+        const folder = `content-image-${Date.now()}-${crypto
           .randomBytes(8)
-          .toString("hex")}.png`;
-        if (hasS3Creds) {
-          const s3 = new S3Client({
-            region: process.env.AWS_REGION,
-            credentials: {
-              accessKeyId: process.env.AWS_ACCESS_KEY_ID,
-              secretAccessKey: process.env.AWS_SECRET_ACCESS_KEY,
-            },
-          });
-          const bucket = process.env.S3_BUCKET;
-          try {
-            await s3.send(
-              new PutObjectCommand({
-                Bucket: bucket,
-                Key: filename,
-                Body: image_bytes,
-                ContentType: "image/png",
-                ACL: "public-read",
-              })
-            );
-            const s3Url = `https://${bucket}.s3.${process.env.AWS_REGION}.amazonaws.com/${filename}`;
-            console.info("[POST /content-image] Image uploaded to S3", {
-              s3Url,
-            });
-            return reply.send({ imageUrl: s3Url });
-          } catch (s3err) {
-            console.warn("[POST /content-image] Failed to upload to S3", {
-              error: s3err.message,
-            });
-            return reply.code(500).send({
-              error: "Failed to upload image to S3",
-              details: s3err.message,
-            });
-          }
-        } else {
-          // Fallback: save locally
-          const localDir = path.join(
-            __dirname,
-            "../../public/generated-images"
-          );
-          if (!fs.existsSync(localDir)) {
-            fs.mkdirSync(localDir, { recursive: true });
-          }
-          const localPath = path.join(localDir, filename);
-          fs.writeFileSync(localPath, image_bytes);
-          const relativeUrl = `/generated-images/${filename}`;
-          console.info("[POST /content-image] Image saved locally", {
-            relativeUrl,
-          });
-          return reply.send({ imageUrl: relativeUrl });
-        }
+          .toString("hex")}`;
+        const s3Folder = `${folder}/`;
+        const bucket = process.env.S3_BUCKET;
+
+        // Save original image as original.png
+        const originalKey = `${s3Folder}original.png`;
+        const originalUrl = await uploadToS3({
+          bucket,
+          key: originalKey,
+          body: originalBuffer,
+          contentType: "image/png",
+        });
+
+        // Generate thumbnail using sharp
+        const thumbnailBuffer = await sharp(originalBuffer)
+          .resize(256, 256, { fit: "inside" })
+          .png()
+          .toBuffer();
+        const thumbnailKey = `${s3Folder}thumbnail.png`;
+        const thumbnailUrl = await uploadToS3({
+          bucket,
+          key: thumbnailKey,
+          body: thumbnailBuffer,
+          contentType: "image/png",
+        });
+
+        return reply.send({
+          originalUrl,
+          thumbnailUrl,
+          folder,
+        });
       } catch (err) {
         console.warn("[POST /content-image] Error contacting OpenAI", {
           error: err.message,
@@ -193,4 +180,7 @@ export function registerContentImageRoute(server) {
       }
     },
   });
+
+  // Register GET /content-image/list
+  registerContentImageListRoute(server);
 }

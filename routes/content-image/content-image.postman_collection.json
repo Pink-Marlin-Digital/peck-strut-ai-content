@@ -64,6 +64,50 @@
           "body": "{\n  \"imageUrl\": \"https://mock-image-url.com/image.png\"\n}"
         }
       ]
+    },
+    {
+      "name": "List Content Images",
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": {
+          "raw": "http://localhost:3000/content-image/list?limit=2",
+          "protocol": "http",
+          "host": ["localhost"],
+          "port": "3000",
+          "path": ["content-image", "list"],
+          "query": [
+            { "key": "limit", "value": "2" }
+          ]
+        },
+        "description": "Lists all generated images and thumbnails with pagination."
+      },
+      "response": [
+        {
+          "name": "Success",
+          "originalRequest": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "http://localhost:3000/content-image/list?limit=2",
+              "protocol": "http",
+              "host": ["localhost"],
+              "port": "3000",
+              "path": ["content-image", "list"],
+              "query": [
+                { "key": "limit", "value": "2" }
+              ]
+            }
+          },
+          "status": "OK",
+          "code": 200,
+          "_postman_previewlanguage": "json",
+          "header": [
+            { "key": "Content-Type", "value": "application/json" }
+          ],
+          "body": "{\n  \"images\": [\n    {\n      \"originalUrl\": \"https://bucket.s3.region.amazonaws.com/folder1/original.png\",\n      \"thumbnailUrl\": \"https://bucket.s3.region.amazonaws.com/folder1/thumbnail.png\",\n      \"folder\": \"folder1\"\n    },\n    {\n      \"originalUrl\": \"https://bucket.s3.region.amazonaws.com/folder2/original.png\",\n      \"thumbnailUrl\": \"https://bucket.s3.region.amazonaws.com/folder2/thumbnail.png\",\n      \"folder\": \"folder2\"\n    }\n  ],\n  \"nextCursor\": \"abcdefg\",\n  \"total\": 10\n}"
+        }
+      ]
     }
   ]
 }
