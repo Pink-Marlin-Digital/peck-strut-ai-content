@@ -7,6 +7,7 @@ import axios from "axios";
 import sharp from "sharp";
 import { uploadToS3 } from "../../services/s3.service.js";
 import crypto from "crypto";
+import { renderPromptFromTemplate } from "./renderPromptFromTemplate.js";
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -78,16 +79,21 @@ export function registerContentImageRoute(server) {
      * Route handler for POST /content-image
      */
     handler: async (request, reply) => {
-      const { message, size = "square" } = request.body;
-      console.info("[POST /content-image] Received request", { message, size });
-      if (!message) {
-        console.warn("[POST /content-image] Missing required field: message", {
-          message,
-        });
-        return reply
-          .code(400)
-          .send({ error: "Missing required field: message" });
-      }
+      const { message, size = "square", subject, style, lighting, mood, resolution } = request.body;
+console.info("[POST /content-image] Received request", { message, size, subject, style, lighting, mood, resolution });
+if (!message) {
+  console.warn("[POST /content-image] Missing required field: message", { message });
+  return reply.code(400).send({ error: "Missing required field: message" });
+}
+// Use message as subject if subject not provided
+const promptValues = {
+  subject: subject || message,
+  style: style || "Fun cartoonish",
+  lighting: lighting || "natural lighting",
+  mood: mood || "warm and inviting",
+  resolution: resolution || "high resolution"
+};
+const prompt = renderPromptFromTemplate(promptValues);
       const apiKey = process.env.IMAGE_API_KEY;
       const baseURL = process.env.IMAGE_API_BASE_URL;
       if (!apiKey) {
@@ -123,10 +129,12 @@ export function registerContentImageRoute(server) {
         });
 
         const response = await openai.images.generate({
-          prompt: message,
+          prompt,
           n: 1,
           size: openaiSize,
-          model: process.env.OPENAI_IMAGE_MODEL || "dall-e-3",
+          // detail: "high",
+          quality: "hd",
+          model: "dall-e-3" || process.env.OPENAI_IMAGE_MODEL || "dall-e-3",
         });
 
         // Download the image from the URL returned by the LLM

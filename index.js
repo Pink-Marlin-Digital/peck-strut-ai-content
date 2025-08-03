@@ -5,6 +5,7 @@ import fastifySwaggerUi from '@fastify/swagger-ui';
 import { registerCreateContentRoute } from './routes/create-content/create-content.route.js';
 import { registerContentImageRoute } from './routes/content-image/content-image.route.js';
 import { registerGenerateIdeaRoute } from './routes/generate-idea/generate-idea.route.js';
+import { registerPostInstagramRoute } from './routes/post-instagram/post-instagram.route.js';
 
 const server = Fastify();
 
@@ -41,6 +42,7 @@ console.info('[index] Registering all routes');
 registerCreateContentRoute(server);
 registerContentImageRoute(server);
 registerGenerateIdeaRoute(server);
+registerPostInstagramRoute(server);
 
 const PORT = process.env.PORT || 3000;
 server.listen({ port: PORT, host: '0.0.0.0' }, err => {
