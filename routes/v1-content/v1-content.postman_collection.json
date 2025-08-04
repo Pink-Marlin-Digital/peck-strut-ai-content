@@ -1,0 +1,536 @@
+{
+	"info": {
+		"_postman_id": "v1-content-api-collection",
+		"name": "V1 Content API",
+		"description": "Collection for testing V1 Content API endpoints with intellectual property-specific routes",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+		"_exporter_id": "v1-content-api"
+	},
+	"item": [
+		{
+			"name": "Create Idea - Peck Strut",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test(\"Status code is 200\", function () {",
+							"    pm.response.to.have.status(200);",
+							"});",
+							"",
+							"pm.test(\"Response has ideas array\", function () {",
+							"    var jsonData = pm.response.json();",
+							"    pm.expect(jsonData).to.have.property('ideas');",
+							"    pm.expect(jsonData.ideas).to.be.an('array');",
+							"});",
+							"",
+							"pm.test(\"Ideas have required properties\", function () {",
+							"    var jsonData = pm.response.json();",
+							"    if (jsonData.ideas && jsonData.ideas.length > 0) {",
+							"        pm.expect(jsonData.ideas[0]).to.have.property('headline');",
+							"    }",
+							"});"
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"method": "POST",
+				"header": [
+					{
+						"key": "Content-Type",
+						"value": "application/json"
+					},
+					{
+						"key": "Authorization",
+						"value": "Bearer {{API_KEY}}",
+						"description": "API Key for authentication"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n  \"platform\": \"Instagram\",\n  \"topic\": \"chicken farming\",\n  \"count\": 3,\n  \"persona\": \"A friendly chicken farmer\",\n  \"sentiment\": \"Enthusiastic and educational\"\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "{{BASE_URL}}/v1/content/peck-strut/create-idea",
+					"host": [
+						"{{BASE_URL}}"
+					],
+					"path": [
+						"v1",
+						"content",
+						"peck-strut",
+						"create-idea"
+					]
+				},
+				"description": "Generate social media post ideas for Peck & Strut IP using IP-specific templates"
+			},
+			"response": []
+		},
+		{
+			"name": "Create Idea - Minimal Request",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test(\"Status code is 200\", function () {",
+							"    pm.response.to.have.status(200);",
+							"});",
+							"",
+							"pm.test(\"Response has ideas array\", function () {",
+							"    var jsonData = pm.response.json();",
+							"    pm.expect(jsonData).to.have.property('ideas');",
+							"    pm.expect(jsonData.ideas).to.be.an('array');",
+							"});"
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"method": "POST",
+				"header": [
+					{
+						"key": "Content-Type",
+						"value": "application/json"
+					},
+					{
+						"key": "Authorization",
+						"value": "Bearer {{API_KEY}}"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "{{BASE_URL}}/v1/content/peck-strut/create-idea",
+					"host": [
+						"{{BASE_URL}}"
+					],
+					"path": [
+						"v1",
+						"content",
+						"peck-strut",
+						"create-idea"
+					]
+				},
+				"description": "Test create-idea with minimal request body (all fields optional)"
+			},
+			"response": []
+		},
+		{
+			"name": "Post Content - Peck Strut",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test(\"Status code is 200\", function () {",
+							"    pm.response.to.have.status(200);",
+							"});",
+							"",
+							"pm.test(\"Response has message, hashtags, and image_prompt\", function () {",
+							"    var jsonData = pm.response.json();",
+							"    pm.expect(jsonData).to.have.property('message');",
+							"    pm.expect(jsonData).to.have.property('hashtags');",
+							"    pm.expect(jsonData).to.have.property('image_prompt');",
+							"    pm.expect(jsonData.hashtags).to.be.an('array');",
+							"});",
+							"",
+							"pm.test(\"Message and image_prompt are not empty\", function () {",
+							"    var jsonData = pm.response.json();",
+							"    pm.expect(jsonData.message).to.not.be.empty;",
+							"    pm.expect(jsonData.image_prompt).to.not.be.empty;",
+							"});"
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"method": "POST",
+				"header": [
+					{
+						"key": "Content-Type",
+						"value": "application/json"
+					},
+					{
+						"key": "Authorization",
+						"value": "Bearer {{API_KEY}}"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n  \"prompt\": \"Share tips about raising happy chickens\",\n  \"persona\": \"A friendly chicken farmer\",\n  \"sentiment\": \"Warm and helpful\"\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "{{BASE_URL}}/v1/content/peck-strut/post-content",
+					"host": [
+						"{{BASE_URL}}"
+					],
+					"path": [
+						"v1",
+						"content",
+						"peck-strut",
+						"post-content"
+					]
+				},
+				"description": "Create formatted social media content for Peck & Strut IP"
+			},
+			"response": []
+		},
+		{
+			"name": "Post Content - Missing Prompt (400 Error)",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test(\"Status code is 400\", function () {",
+							"    pm.response.to.have.status(400);",
+							"});",
+							"",
+							"pm.test(\"Error message mentions missing prompt\", function () {",
+							"    var jsonData = pm.response.json();",
+							"    pm.expect(jsonData).to.have.property('error');",
+							"    pm.expect(jsonData.error).to.include('prompt');",
+							"});"
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"method": "POST",
+				"header": [
+					{
+						"key": "Content-Type",
+						"value": "application/json"
+					},
+					{
+						"key": "Authorization",
+						"value": "Bearer {{API_KEY}}"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n  \"persona\": \"A friendly chicken farmer\",\n  \"sentiment\": \"Warm and helpful\"\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "{{BASE_URL}}/v1/content/peck-strut/post-content",
+					"host": [
+						"{{BASE_URL}}"
+					],
+					"path": [
+						"v1",
+						"content",
+						"peck-strut",
+						"post-content"
+					]
+				},
+				"description": "Test validation - should return 400 error when prompt is missing"
+			},
+			"response": []
+		},
+		{
+			"name": "Content Image - Peck Strut",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test(\"Status code is 200\", function () {",
+							"    pm.response.to.have.status(200);",
+							"});",
+							"",
+							"pm.test(\"Response has image URLs and folder\", function () {",
+							"    var jsonData = pm.response.json();",
+							"    pm.expect(jsonData).to.have.property('originalUrl');",
+							"    pm.expect(jsonData).to.have.property('thumbnailUrl');",
+							"    pm.expect(jsonData).to.have.property('folder');",
+							"});",
+							"",
+							"pm.test(\"URLs are valid\", function () {",
+							"    var jsonData = pm.response.json();",
+							"    pm.expect(jsonData.originalUrl).to.match(/^https?:\\/\\/.+/);",
+							"    pm.expect(jsonData.thumbnailUrl).to.match(/^https?:\\/\\/.+/);",
+							"});",
+							"",
+							"pm.test(\"Folder name includes IP identifier\", function () {",
+							"    var jsonData = pm.response.json();",
+							"    pm.expect(jsonData.folder).to.include('v1-content-peck-strut');",
+							"});"
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"method": "POST",
+				"header": [
+					{
+						"key": "Content-Type",
+						"value": "application/json"
+					},
+					{
+						"key": "Authorization",
+						"value": "Bearer {{API_KEY}}"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n  \"message\": \"Happy chickens in a sunny farmyard\",\n  \"size\": \"square\",\n  \"style\": \"cartoon\",\n  \"mood\": \"cheerful\",\n  \"lighting\": \"natural lighting\",\n  \"resolution\": \"high resolution\"\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "{{BASE_URL}}/v1/content/peck-strut/content-image",
+					"host": [
+						"{{BASE_URL}}"
+					],
+					"path": [
+						"v1",
+						"content",
+						"peck-strut",
+						"content-image"
+					]
+				},
+				"description": "Generate an image for Peck & Strut IP using IP-specific templates"
+			},
+			"response": []
+		},
+		{
+			"name": "Content Image - Portrait Size",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test(\"Status code is 200\", function () {",
+							"    pm.response.to.have.status(200);",
+							"});",
+							"",
+							"pm.test(\"Response has image URLs\", function () {",
+							"    var jsonData = pm.response.json();",
+							"    pm.expect(jsonData).to.have.property('originalUrl');",
+							"    pm.expect(jsonData).to.have.property('thumbnailUrl');",
+							"});"
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"method": "POST",
+				"header": [
+					{
+						"key": "Content-Type",
+						"value": "application/json"
+					},
+					{
+						"key": "Authorization",
+						"value": "Bearer {{API_KEY}}"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n  \"message\": \"Chickens pecking in the yard\",\n  \"size\": \"portrait\"\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "{{BASE_URL}}/v1/content/peck-strut/content-image",
+					"host": [
+						"{{BASE_URL}}"
+					],
+					"path": [
+						"v1",
+						"content",
+						"peck-strut",
+						"content-image"
+					]
+				},
+				"description": "Test content-image with portrait size and minimal parameters"
+			},
+			"response": []
+		},
+		{
+			"name": "Invalid IP - 404 Error",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test(\"Status code is 404\", function () {",
+							"    pm.response.to.have.status(404);",
+							"});",
+							"",
+							"pm.test(\"Error message mentions IP not found\", function () {",
+							"    var jsonData = pm.response.json();",
+							"    pm.expect(jsonData).to.have.property('error');",
+							"    pm.expect(jsonData.error).to.include('not found');",
+							"    pm.expect(jsonData.error).to.include('non-existent-ip');",
+							"});"
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"method": "POST",
+				"header": [
+					{
+						"key": "Content-Type",
+						"value": "application/json"
+					},
+					{
+						"key": "Authorization",
+						"value": "Bearer {{API_KEY}}"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n  \"platform\": \"Instagram\",\n  \"topic\": \"test\",\n  \"count\": 1\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "{{BASE_URL}}/v1/content/non-existent-ip/create-idea",
+					"host": [
+						"{{BASE_URL}}"
+					],
+					"path": [
+						"v1",
+						"content",
+						"non-existent-ip",
+						"create-idea"
+					]
+				},
+				"description": "Test IP validation - should return 404 for non-existent intellectual property"
+			},
+			"response": []
+		},
+		{
+			"name": "Dad Burbs - Create Idea",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test(\"Status code is 200\", function () {",
+							"    pm.response.to.have.status(200);",
+							"});",
+							"",
+							"pm.test(\"Response has ideas array\", function () {",
+							"    var jsonData = pm.response.json();",
+							"    pm.expect(jsonData).to.have.property('ideas');",
+							"    pm.expect(jsonData.ideas).to.be.an('array');",
+							"});"
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"method": "POST",
+				"header": [
+					{
+						"key": "Content-Type",
+						"value": "application/json"
+					},
+					{
+						"key": "Authorization",
+						"value": "Bearer {{API_KEY}}"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n  \"platform\": \"TikTok\",\n  \"topic\": \"dad life in the suburbs\",\n  \"count\": 2,\n  \"persona\": \"A suburban dad\",\n  \"sentiment\": \"Funny and relatable\"\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "{{BASE_URL}}/v1/content/dad-burbs/create-idea",
+					"host": [
+						"{{BASE_URL}}"
+					],
+					"path": [
+						"v1",
+						"content",
+						"dad-burbs",
+						"create-idea"
+					]
+				},
+				"description": "Test with a different IP (dad-burbs) to verify IP-specific template loading"
+			},
+			"response": []
+		}
+	],
+	"event": [
+		{
+			"listen": "prerequest",
+			"script": {
+				"type": "text/javascript",
+				"exec": [
+					""
+				]
+			}
+		},
+		{
+			"listen": "test",
+			"script": {
+				"type": "text/javascript",
+				"exec": [
+					""
+				]
+			}
+		}
+	],
+	"variable": [
+		{
+			"key": "BASE_URL",
+			"value": "http://localhost:3000",
+			"description": "Base URL for the API server"
+		},
+		{
+			"key": "API_KEY",
+			"value": "your-api-key-here",
+			"description": "API key for authentication"
+		}
+	]
+}

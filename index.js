@@ -7,6 +7,7 @@ import { registerCreateContentRoute } from './routes/create-content/create-conte
 import { registerContentImageRoute } from './routes/content-image/content-image.route.js';
 import { registerGenerateIdeaRoute } from './routes/generate-idea/generate-idea.route.js';
 import { registerPostInstagramRoute } from './routes/post-instagram/post-instagram.route.js';
+import { registerV1ContentRoutes } from './routes/v1-content/v1-content.route.js';
 
 const server = Fastify();
 
@@ -51,6 +52,7 @@ registerCreateContentRoute(server);
 registerContentImageRoute(server);
 registerGenerateIdeaRoute(server);
 registerPostInstagramRoute(server);
+registerV1ContentRoutes(server);
 
 const PORT = process.env.PORT || 3000;
 server.listen({ port: PORT, host: '0.0.0.0' }, err => {
